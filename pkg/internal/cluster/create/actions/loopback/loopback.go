@@ -19,9 +19,10 @@ package loopback
 
 import (
 	"fmt"
+	"strings"
+
 	"sigs.k8s.io/kind/pkg/errors"
 	"sigs.k8s.io/kind/pkg/internal/cluster/create/actions"
-	"strings"
 )
 
 // kubeadmInitAction implements action for executing the kubadm init
@@ -69,6 +70,9 @@ func (a *action) Execute(ctx *actions.ActionContext) error {
 			continue
 		}
 		for _, route := range strings.Split(routes, ",") {
+			if route == "" {
+				continue
+			}
 			fmt.Printf("Install route: %v\n", route)
 			args := []string{"r", "a"}
 			args = append(args, strings.Split(route, " ")...)
