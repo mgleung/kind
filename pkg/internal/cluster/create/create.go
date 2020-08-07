@@ -39,6 +39,7 @@ import (
 	"sigs.k8s.io/kind/pkg/internal/cluster/create/actions/kubeadmjoin"
 	"sigs.k8s.io/kind/pkg/internal/cluster/create/actions/loadbalancer"
 	"sigs.k8s.io/kind/pkg/internal/cluster/create/actions/loopback"
+	"sigs.k8s.io/kind/pkg/internal/cluster/create/actions/nicbridge"
 	"sigs.k8s.io/kind/pkg/internal/cluster/create/actions/waitforready"
 )
 
@@ -96,6 +97,7 @@ func Cluster(ctx *context.Context, options ...create.ClusterOption) error {
 	actionsToRun := []actions.Action{
 		loadbalancer.NewAction(), // setup external loadbalancer
 		loopback.NewAction(),     // add loopback addresses
+		nicbridge.NewAction(),    // add a bridge on the NICs
 		configaction.NewAction(), // setup kubeadm config
 	}
 	if opts.SetupKubernetes {

@@ -31,6 +31,7 @@ type Node interface {
 	Role() (string, error)     // see also: pkg/cluster/constants
 	Loopback() (string, error) // see also: pkg/cluster/constants
 	Routes() (string, error)   // see also: pkg/cluster/constants
+	NICs() ([]string, error)
 	// TODO(bentheelder): should return node addresses more generally
 	// Possibly remove this method in favor of obtaining this detail with
 	// exec or from the provider

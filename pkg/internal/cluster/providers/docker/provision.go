@@ -82,6 +82,9 @@ func planCreation(cluster string, cfg *config.Cluster) (createContainerFuncs []f
 				if err == nil {
 					err = connectExtraNetworks(node, name)
 				}
+				//if err == nil {
+				//	err = setupBridge(name)
+				//}
 				return err
 			})
 		case config.WorkerRole:
@@ -108,6 +111,15 @@ func connectExtraNetworks(node *config.Node, name string) error {
 		if err := exec.Command("docker", "network", "connect", network, name).Run(); err != nil {
 			return errors.Wrap(err, "docker network connect error")
 		}
+	}
+	return nil
+}
+
+// Need to setup the bridge here for each node. Run a docker exec command to set it up linking it to the two network interfaces.
+func setupBridge(nodeName string) error {
+	// TODO: This may not be the right place after all
+	if err := exec.Command("docker", "exec", nodeName, "/bin/bash", "-x", "-c", "\"ip link add name br0 type bridge; ip link set dev br0 up; ip link set dev eth0 master br0; ip link set dev eth1 master br0\"").Run(); err != nil {
+		return errors.Wrap(err, "docker interface bridge setup error")
 	}
 	return nil
 }

@@ -116,6 +116,11 @@ func (n *node) IP() (ipv4 string, ipv6 string, err error) {
 	return
 }
 
+// TODO: Might need to add separate labels similar to how routes and loopback address are done later.
+func (n *node) NICs() ([]string, error) {
+	return []string{"eth0", "eth1"}, nil
+}
+
 func (n *node) Command(command string, args ...string) exec.Cmd {
 	return &nodeCmd{
 		nameOrID: n.name,
