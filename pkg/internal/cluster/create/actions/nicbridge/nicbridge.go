@@ -36,6 +36,7 @@ func NewAction() actions.Action {
 
 // Execute runs the action
 func (a *action) Execute(ctx *actions.ActionContext) error {
+	fmt.Print("RUNNING THE BRIDGE CREATION ACTION\n")
 	allNodes, err := ctx.Nodes()
 	if err != nil {
 		return err
@@ -43,6 +44,7 @@ func (a *action) Execute(ctx *actions.ActionContext) error {
 
 	for _, node := range allNodes {
 		// Add the bridge interface for the node
+		fmt.Printf("Add the bridge br0 for node: %v\n", node)
 		cmd := node.Command("ip", "link", "add", "name", "br0", "type", "bridge")
 		err := cmd.Run()
 		if err != nil {
@@ -50,10 +52,37 @@ func (a *action) Execute(ctx *actions.ActionContext) error {
 		}
 
 		// Bring up the bridge
+		fmt.Printf("Activate the bridge br0 for node: %v\n", node)
 		cmd = node.Command("ip", "link", "set", "dev", "br0", "up")
 		err = cmd.Run()
 		if err != nil {
 			return errors.Wrap(err, "failed to bring up the bridge")
+		}
+
+		// Assign an IP address to the bridge
+		// TODO: Make the address configurable since this will probably differ per different nodes.
+		bridgeAddr := "172.31.13.1"
+		fmt.Printf("Assigning address %v to br0 on node: %v\n", bridgeAddr, node)
+		cmd = node.Command("ip", "addr", "add", bridgeAddr+"/24", "dev", "br0")
+		err = cmd.Run()
+		if err != nil {
+			return errors.Wrap(err, "failed to assign address to the bridge")
+		}
+
+		// Delete the default route
+		fmt.Print("Deleting the default route to replace it with the bridge\n")
+		cmd = node.Command("ip", "route", "delete", "default")
+		err = cmd.Run()
+		if err != nil {
+			return errors.Wrap(err, "failed to delete the default route")
+		}
+
+		// Set the bridge as the default route
+		fmt.Print("Assigning the bridge as the default route\n")
+		cmd = node.Command("ip", "route", "add", "default", "via", bridgeAddr)
+		err = cmd.Run()
+		if err != nil {
+			return errors.Wrap(err, "failed to assign default route to bridge")
 		}
 
 		nics, err := node.NICs()

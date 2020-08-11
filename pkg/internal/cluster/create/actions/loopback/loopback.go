@@ -37,6 +37,7 @@ func NewAction() actions.Action {
 
 // Execute runs the action
 func (a *action) Execute(ctx *actions.ActionContext) error {
+	fmt.Print("IS THIS EVEN MY VERSION?\n")
 	allNodes, err := ctx.Nodes()
 	if err != nil {
 		return err
